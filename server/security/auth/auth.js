@@ -11,4 +11,5 @@ module.exports = async (req, res, next) => {
   } catch (error) {
     res.status(500).json(error.message);
   }
+  next();
 };
