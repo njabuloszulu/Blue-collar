@@ -3,6 +3,7 @@ const { hashedPassword } = require("../security/hashedPassword");
 const { createToken } = require("../security/generator");
 const bcrypt = require("bcrypt");
 const validate = require("../security/auth/validate");
+const auth = require("../security/auth/auth");
 
 const Routes = (app) => {
   app.get("/query", async (req, res) => {
@@ -58,6 +59,28 @@ const Routes = (app) => {
 
       const token = createToken(results.rows[0]);
       res.send({ token });
+    } catch (error) {
+      res.status(500).json(error.message);
+    }
+  });
+
+  app.get("/query/verify", auth, async (req, res) => {
+    try {
+      res.json(true);
+    } catch (error) {
+      res.status(500).json(error.message);
+    }
+  });
+
+  app.get("/query/dashboard", auth, async (req, res) => {
+    try {
+      // res.json(req.user);
+      const user = poolPromise;
+      const results = await user.query(
+        "select * from bluecollar.employers where title = $1",
+        ['dog walker']
+      );
+      res.status(200).json(results);
     } catch (error) {
       res.status(500).json(error.message);
     }
