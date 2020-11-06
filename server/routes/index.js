@@ -2,6 +2,7 @@ const { poolPromise } = require("../connection/DB");
 const { hashedPassword } = require("../security/hashedPassword");
 const { createToken } = require("../security/generator");
 const bcrypt = require("bcrypt");
+const validate = require("../security/auth/validate");
 
 const Routes = (app) => {
   app.get("/query", async (req, res) => {
@@ -14,7 +15,7 @@ const Routes = (app) => {
     }
   });
 
-  app.post("/query/register", async (req, res) => {
+  app.post("/query/register", validate, async (req, res) => {
     const { name, surname, email, physicalAddress, password } = req.body;
     try {
       const user = await poolPromise;
@@ -26,7 +27,7 @@ const Routes = (app) => {
         return res.status(403).send("email already exist ");
       }
       const passwordHash = await hashedPassword(password);
-      const results = await user.query( 
+      const results = await user.query(
         `insert into bluecollar.applicant(name,surname,email,physicalAddress,password) values($1,$2,$3,$4,$5)`,
         [name, surname, email, physicalAddress, passwordHash]
       );
@@ -37,7 +38,7 @@ const Routes = (app) => {
     }
   });
 
-  app.post("/query/login", async (req, res) => {
+  app.post("/query/login", validate, async (req, res) => {
     try {
       const { email, password } = req.body;
       const user = await poolPromise;
